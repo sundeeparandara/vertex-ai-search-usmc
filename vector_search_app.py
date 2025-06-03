@@ -169,6 +169,20 @@ if st.button("🔍 Search", type="primary") or query:
                             content = getattr(result, 'page_content', None)
                             metadata = getattr(result, 'metadata', {})
                             
+                            # Check if content is actually a JSON string (cloud issue)
+                            if content and isinstance(content, str) and content.startswith('{"'):
+                                try:
+                                    # Parse the JSON content
+                                    parsed_content = json.loads(content)
+                                    # Extract the actual page content
+                                    content = parsed_content.get('page_content', content)
+                                    # Merge metadata from JSON if available
+                                    if 'metadata' in parsed_content:
+                                        metadata.update(parsed_content['metadata'])
+                                except json.JSONDecodeError:
+                                    # If JSON parsing fails, use original content
+                                    pass
+                            
                             # If that fails, try dict format
                             if content is None and isinstance(result, dict):
                                 content = result.get('page_content', str(result))
