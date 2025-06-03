@@ -151,28 +151,60 @@ if st.button("🔍 Search", type="primary") or query:
                 if results:
                     st.success(f"Found {len(results)} relevant documents")
                     
+                    # Debug: Show what type of results we got
+                    if os.path.exists("config.json"):
+                        # Local - don't show debug
+                        pass
+                    else:
+                        # Cloud - add debug info
+                        st.info(f"Debug: Result type: {type(results[0])}")
+                        if hasattr(results[0], '__dict__'):
+                            st.info(f"Debug: Result attributes: {list(results[0].__dict__.keys())}")
+                    
                     # Display results
                     for i, result in enumerate(results, 1):
-                        with st.expander(f"📄 Result {i}: {result.metadata.get('element_type', 'Document')}", expanded=(i<=2)):
+                        # Handle different result formats
+                        try:
+                            # Try standard LangChain Document format first
+                            content = getattr(result, 'page_content', None)
+                            metadata = getattr(result, 'metadata', {})
+                            
+                            # If that fails, try dict format
+                            if content is None and isinstance(result, dict):
+                                content = result.get('page_content', str(result))
+                                metadata = result.get('metadata', {})
+                            
+                            # If still no content, convert to string
+                            if content is None:
+                                content = str(result)
+                                metadata = {}
+                                
+                        except Exception as e:
+                            st.error(f"Error parsing result {i}: {e}")
+                            content = str(result)
+                            metadata = {}
+                        
+                        element_type = metadata.get('element_type', 'Document')
+                        with st.expander(f"📄 Result {i}: {element_type}", expanded=(i<=2)):
                             # Main content
                             st.markdown("**Summary:**")
-                            st.write(result.page_content)
+                            st.write(content)
                             
                             # Metadata
                             col1, col2, col3 = st.columns(3)
                             with col1:
-                                st.markdown(f"**Source:** {result.metadata.get('source', 'Unknown')}")
+                                st.markdown(f"**Source:** {metadata.get('source', 'Unknown')}")
                             with col2:
-                                page_num = result.metadata.get('page_number')
+                                page_num = metadata.get('page_number')
                                 st.markdown(f"**Page:** {page_num if page_num else 'Unknown'}")
                             with col3:
-                                seq_id = result.metadata.get('sequence_id')
+                                seq_id = metadata.get('sequence_id')
                                 st.markdown(f"**Sequence:** {seq_id if seq_id is not None else 'Unknown'}")
                             
                             # Original text preview (no nested expander)
-                            if result.metadata.get('original_text'):
+                            if metadata.get('original_text'):
                                 st.markdown("**📖 Original Text Preview:**")
-                                st.text(result.metadata['original_text'])
+                                st.text(metadata['original_text'])
                 else:
                     st.warning("No results found. Try a different query.")
                     
