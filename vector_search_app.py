@@ -215,10 +215,17 @@ if st.button("🔍 Search", type="primary") or query:
                                 seq_id = metadata.get('sequence_id')
                                 st.markdown(f"**Sequence:** {seq_id if seq_id is not None else 'Unknown'}")
                             
-                            # Original text preview (no nested expander)
+                            # Original text preview
                             if metadata.get('original_text'):
                                 st.markdown("**📖 Original Text Preview:**")
-                                st.text(metadata['original_text'])
+                                st.text_area(
+                                    "Full context from the original document",
+                                    metadata['original_text'], 
+                                    height=150, 
+                                    disabled=True,
+                                    key=f"original_text_{i}",  # Unique key for each result
+                                    help="This is the original text from the source document that was used to generate the summary above"
+                                )
                 else:
                     st.warning("No results found. Try a different query.")
                     
