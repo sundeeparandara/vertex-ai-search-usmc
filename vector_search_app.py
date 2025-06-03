@@ -152,14 +152,14 @@ if st.button("🔍 Search", type="primary") or query:
                     st.success(f"Found {len(results)} relevant documents")
                     
                     # Debug: Show what type of results we got
-                    if os.path.exists("config.json"):
-                        # Local - don't show debug
-                        pass
-                    else:
-                        # Cloud - add debug info
-                        st.info(f"Debug: Result type: {type(results[0])}")
-                        if hasattr(results[0], '__dict__'):
-                            st.info(f"Debug: Result attributes: {list(results[0].__dict__.keys())}")
+                    # if os.path.exists("config.json"):
+                    #     # Local - don't show debug
+                    #     pass
+                    # else:
+                    #     # Cloud - add debug info
+                    #     st.info(f"Debug: Result type: {type(results[0])}")
+                    #     if hasattr(results[0], '__dict__'):
+                    #         st.info(f"Debug: Result attributes: {list(results[0].__dict__.keys())}")
                     
                     # Display results
                     for i, result in enumerate(results, 1):
