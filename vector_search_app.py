@@ -2,7 +2,17 @@ import streamlit as st
 import json
 import os
 from google.cloud import aiplatform
-from langchain_google_vertexai import VectorSearchVectorStore, VertexAIEmbeddings
+
+# Try different import paths for VertexAI components
+try:
+    from langchain_google_vertexai import VectorSearchVectorStore, VertexAIEmbeddings
+except ImportError:
+    try:
+        from langchain_google_vertexai.vectorstores import VectorSearchVectorStore
+        from langchain_google_vertexai.embeddings import VertexAIEmbeddings
+    except ImportError:
+        st.error("Failed to import VertexAI components. Please check langchain-google-vertexai version compatibility.")
+        st.stop()
 
 def load_config():
     """Load configuration from local file or environment variable"""
