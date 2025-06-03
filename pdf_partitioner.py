@@ -97,8 +97,9 @@ import os
 import base64
 import pickle
 import logging
+from collections import Counter
 
-# Enable logging for unstructured and pdf2image
+#Enable logging for unstructured and pdf2image
 # logging.basicConfig(level=logging.DEBUG)
 # logging.getLogger("unstructured").setLevel(logging.DEBUG)
 # logging.getLogger("pdf2image").setLevel(logging.DEBUG)
@@ -120,14 +121,22 @@ def load_elements_pickle(filename):
     return elements
 
 def main():
+
     if not os.path.exists(PDF_PATH):
         print(f"❌ PDF file not found: {PDF_PATH}")
         return
+    else:
+        print(f"📄 PDF file found: {PDF_PATH}")
 
+    print("Checking for existing .pkl file...")
     # Check for existing .pkl
     if os.path.exists(PKL_PATH):
+        print(f"📄PKL file found: {PKL_PATH}")
+        print("Reading from pkl file...")
         elements = load_elements_pickle(PKL_PATH)
+        print("Done.")
     else:
+        print("No .pkl file found. Partitioning PDF...")
         print(f"📄 Partitioning PDF: {PDF_PATH}")
         elements = partition_pdf(
             filename=PDF_PATH,
@@ -198,10 +207,24 @@ def main():
     print(f"\n🖼️ Found {len(images)} images:")
     for i, img in enumerate(images[:1]):
         print(f"\n--- Image {i+1} ---")
-        print(f"MIME type: {img.metadata.image_mime_type}")
-        if img.image_data:
-            encoded = base64.b64encode(img.image_data.getvalue()).decode("utf-8")
-            print(f"Base64 Preview: {encoded[:200]}...")
+        print(f"Type: {type(img)}")
+        print(f"Text content: {img.text}")
+        try:
+            print(f"Page number: {img.metadata.page_number}")
+        except AttributeError:
+            print("Page number not available")
+        try:
+            print(f"Available metadata: {dir(img.metadata)}")
+        except AttributeError:
+            print("No metadata available")
+
+    # Report all unique element types and their counts
+    element_types = [type(el).__name__ for el in elements]
+    type_counts = Counter(element_types)
+    print("\n📊 Element Type Report:")
+    for t, count in type_counts.items():
+        print(f"- {t}: {count}")
+    print(f"\nTotal unique element types: {len(type_counts)}")
 
 if __name__ == "__main__":
     main()
