@@ -40,28 +40,27 @@ if os.path.exists("config.json"):
 else:
     st.sidebar.success("🌐 Running in cloud")
 
-"""
-What gets cached:
-#Connection Objects:
-✅ VectorSearchVectorStore object (connection interface)
-✅ VertexAIEmbeddings object (API client)
-✅ Authentication tokens and session info
-✅ Configuration settings (project ID, location, etc.)
-Size: ~A few MB of connection objects
-
-☁️ What stays remote (in Google Cloud):
-The Actual Data:
-❌ 619 × 768 vector matrix (stays in Google Vector Search)
-❌ Embedding model weights (text-embedding-005 model on Google's servers)
-❌ Vector database index (your tree-AH algorithm structure)
-❌ Document content (your 619 document summaries)
-Size: ~Hundreds of MB to GB of actual data
-
-🔍 What happens when you search:
-Cached: Connection objects (fast lookup)
-Remote API call: Your query → Google's embedding service → 768-dimensional vector
-Remote database query: Vector similarity search in Google Cloud
-Remote API response: Matching documents sent back"""
+# What gets cached:
+# Connection Objects:
+# ✅ VectorSearchVectorStore object (connection interface)
+# ✅ VertexAIEmbeddings object (API client)
+# ✅ Authentication tokens and session info
+# ✅ Configuration settings (project ID, location, etc.)
+# Size: ~A few MB of connection objects
+#
+# ☁️ What stays remote (in Google Cloud):
+# The Actual Data:
+# ❌ 619 × 768 vector matrix (stays in Google Vector Search)
+# ❌ Embedding model weights (text-embedding-005 model on Google's servers)
+# ❌ Vector database index (your tree-AH algorithm structure)
+# ❌ Document content (your 619 document summaries)
+# Size: ~Hundreds of MB to GB of actual data
+#
+# 🔍 What happens when you search:
+# Cached: Connection objects (fast lookup)
+# Remote API call: Your query → Google's embedding service → 768-dimensional vector
+# Remote database query: Vector similarity search in Google Cloud
+# Remote API response: Matching documents sent back
 
 @st.cache_resource
 def load_vector_store():
