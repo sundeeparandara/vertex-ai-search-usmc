@@ -1,0 +1,12 @@
+langchain>=0.1.16
+langchain-community>=0.0.30
+langchain-core>=0.1.30
+langchain-google-vertexai>=0.0.8
+langchain-text-splitters>=0.0.1
+google-cloud-aiplatform>=1.51.0
+pydantic>=2.11.0
+unstructured>=0.12.6
+vertexai>=0.0.1
+#pdf2image>=1.16.3  # Only if you use pdf2image for PDF processing
+# Other dependencies
+#pickle-mixin  # for pickle, if needed 
