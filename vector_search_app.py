@@ -1,7 +1,31 @@
 import streamlit as st
 import json
+import os
 from google.cloud import aiplatform
 from langchain_google_vertexai import VectorSearchVectorStore, VertexAIEmbeddings
+
+def load_config():
+    """Load configuration from local file or environment variable"""
+    # Try to load from local config.json first
+    if os.path.exists("config.json"):
+        try:
+            with open("config.json", "r") as f:
+                return json.load(f)
+        except Exception as e:
+            st.error(f"Failed to load local config.json: {e}")
+            st.stop()
+    else:
+        # Assume running in cloud, get config from environment variable
+        config_json = os.getenv('CONFIG_JSON_USMC_AI_1')
+        if config_json:
+            try:
+                return json.loads(config_json)
+            except Exception as e:
+                st.error(f"Failed to parse CONFIG_JSON_USMC_AI_1 environment variable: {e}")
+                st.stop()
+        else:
+            st.error("No configuration found. Expected either config.json file locally or CONFIG_JSON_USMC_AI_1 environment variable in cloud.")
+            st.stop()
 
 # Page config
 st.set_page_config(
@@ -10,18 +34,45 @@ st.set_page_config(
     layout="wide"
 )
 
+# Environment indicator
+if os.path.exists("config.json"):
+    st.sidebar.info("💻 Running locally")
+else:
+    st.sidebar.success("🌐 Running in cloud")
+
+# What gets cached:
+# Connection Objects:
+# ✅ VectorSearchVectorStore object (connection interface)
+# ✅ VertexAIEmbeddings object (API client)
+# ✅ Authentication tokens and session info
+# ✅ Configuration settings (project ID, location, etc.)
+# Size: ~A few MB of connection objects
+#
+# ☁️ What stays remote (in Google Cloud):
+# The Actual Data:
+# ❌ 619 × 768 vector matrix (stays in Google Vector Search)
+# ❌ Embedding model weights (text-embedding-005 model on Google's servers)
+# ❌ Vector database index (your tree-AH algorithm structure)
+# ❌ Document content (your 619 document summaries)
+# Size: ~Hundreds of MB to GB of actual data
+#
+# 🔍 What happens when you search:
+# Cached: Connection objects (fast lookup)
+# Remote API call: Your query → Google's embedding service → 768-dimensional vector
+# Remote database query: Vector similarity search in Google Cloud
+# Remote API response: Matching documents sent back
+
 @st.cache_resource
 def load_vector_store():
     """Load and cache the vector store connection"""
-    # Load config
-    with open("config.json", "r") as f:
-        config = json.load(f)
+    # Load config from appropriate source
+    config = load_config()
 
     PROJECT_ID = config["project_id"]
     LOCATION = config["location"]
     INDEX_ID = config["index_id"]
     ENDPOINT_ID = config["endpoint_id"]
-    GCS_BUCKET_NAME = "usmc_bucket_test"
+    GCS_BUCKET_NAME = config["bucket_name"]
 
     # Initialize Vertex AI
     aiplatform.init(project=PROJECT_ID, location=LOCATION)
@@ -120,9 +171,6 @@ if st.button("🔍 Search", type="primary") or query:
                 st.error("Make sure your vector database is properly configured.")
     else:
         st.warning("Please enter a search query.")
-
-
-
 
 # Footer
 st.markdown("---")
