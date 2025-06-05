@@ -7,6 +7,7 @@ google-cloud-aiplatform>=1.51.0
 pydantic>=2.11.0
 unstructured>=0.12.6
 vertexai>=0.0.1
+fitz
 #pdf2image>=1.16.3  # Only if you use pdf2image for PDF processing
 # Other dependencies
 #pickle-mixin  # for pickle, if needed 
